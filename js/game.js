@@ -55,11 +55,14 @@ const Game = {
             <div class="game-overlay">
                 <div class="fps-counter" id="fps-counter" style="display:${App.config.showFPS ? 'block' : 'none'}">60 FPS</div>
                 <div class="hud-cluster">
-                    <div class="hud-cluster-row">
+                    <div class="hud-cluster-row" id="hud-mode-row">
                         <div class="hud-chip">${this.mode === 'multiplayer' ? 'MULTIPLAYER' : 'SOLO'}</div>
                         ${this.roomCode ? `<div class="hud-chip">SALA ${this.roomCode}</div>` : ''}
                     </div>
-                    <button class="exit-game-btn" onclick="Game.exit()">SALIR</button>
+                    <div class="hud-cluster-row">
+                        <button class="creative-toggle-btn" onclick="Friends.openInvitePanel('game')">👥 AMIGOS</button>
+                        <button class="exit-game-btn" onclick="Game.exit()">SALIR</button>
+                    </div>
                 </div>
             </div>
 
@@ -180,6 +183,21 @@ const Game = {
     },
 
     // ===== MULTIPLAYER (sin cambios de lógica, solo mejoras visuales alrededor) =====
+    // Convierte una partida Solo en curso en una partida compartida cuando
+    // se invita a un amigo desde dentro del mundo (sin reiniciar la escena).
+    becomeMultiplayerHost(room) {
+        if (this.mode === 'multiplayer') return;
+        this.mode = 'multiplayer';
+        this.roomCode = room;
+
+        const row = document.getElementById('hud-mode-row');
+        if (row) {
+            row.innerHTML = `<div class="hud-chip">MULTIPLAYER</div><div class="hud-chip">SALA ${room}</div>`;
+        }
+
+        this.setupMultiplayer();
+    },
+
     setupMultiplayer() {
         if (this.mode !== 'multiplayer' || !App.socket) return;
 

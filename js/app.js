@@ -81,6 +81,11 @@ const App = {
         const savedProfile = localStorage.getItem('riverojsx_profile');
         if (savedProfile) {
             this.player = JSON.parse(savedProfile);
+            // Migrar IDs del formato antiguo (letras+números) al nuevo de 8 dígitos
+            if (!/^\d{8}$/.test(this.player.id || '')) {
+                this.player.id = this.generateId();
+                this.saveProfile();
+            }
         } else {
             this.player.name = this.generateRandomName();
             this.player.id = this.generateId();
@@ -121,7 +126,8 @@ const App = {
     },
     
     generateId() {
-        return 'usr_' + Math.random().toString(36).substr(2, 9);
+        // ID de 8 dígitos numéricos (sin letras), usado para agregar amigos
+        return String(Math.floor(10000000 + Math.random() * 90000000));
     },
     
     generateRoomCode() {
@@ -149,6 +155,35 @@ const App = {
             
             this.socket.on('friend_status', (data) => {
                 this.updateFriendStatus(data);
+            });
+
+            // ===== AMIGOS =====
+            this.socket.on('friend_request_received', (data) => {
+                this.toast(data.fromName + ' te envió una solicitud de amistad');
+                if (typeof Friends !== 'undefined') Friends.refresh();
+            });
+
+            this.socket.on('friend_added', (data) => {
+                this.toast(data.name + ' ahora es tu amigo');
+                if (typeof Friends !== 'undefined') Friends.refresh();
+            });
+
+            this.socket.on('friend_removed', () => {
+                if (typeof Friends !== 'undefined') Friends.refresh();
+            });
+
+            // ===== INVITACIONES DENTRO DEL MUNDO =====
+            // Puede llegar estando en cualquier pantalla (menú, perfil, etc.)
+            this.socket.on('invite_received', (data) => {
+                if (typeof Friends !== 'undefined') Friends.showIncomingInvite(data);
+            });
+
+            this.socket.on('invite_declined', (data) => {
+                this.toast(data.toName + ' rechazó tu invitación');
+            });
+
+            this.socket.on('invite_accepted', (data) => {
+                this.toast(data.toName + ' se unió a la partida');
             });
             
         } catch (e) {
@@ -190,7 +225,7 @@ const App = {
             case 'config': Menu.showConfig(); break;
             case 'profile': Menu.showProfile(); break;
             case 'add_friend': Menu.showAddFriend(); break;
-            case 'dev_mode': Developer.enterDevMode(); break;
+            case 'dev_mode': Developer.enterDevMode(data); break;
             case 'game': Game.start(data); break;
         }
     },

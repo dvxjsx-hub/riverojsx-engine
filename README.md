@@ -1,296 +1,155 @@
+# riverojsx-engine
 
-Motor de juego 3D web para móvil (vertical) con modo desarrollador, construcción estilo Minecraft, y multijugador online.
+> **Motor de juego experimental desarrollado por riverojsx.**
+> **100% desde celular para celular, modo 100% horizontal**
 
-## Características
+## 📖 Descripción
 
-- **Menú principal**: Jugar (Solo/Multiplayer), Novedades, Mapas, Configuración
-- **Perfil**: Nombre aleatorio editable, lista de amigos (activo/inactivo)
-- **Solo**: Seleccionar mapa (default o creados en modo desarrollador)
-- **Multiplayer**: Crear sala (código 4 dígitos, 2-4 jugadores), unirse por código
-- **Modo Desarrollador**: Mundo 3D con construcción (pared, piso, techo, ventana, puerta), volar, noclip, guardar mapas
-- **Mapas compartidos**: Los mapas guardados aparecen en la sección Mapas para todos
-- **Online**: Socket.io para multijugador en tiempo real
+**riverojsx-engine** es un motor de juego en desarrollo creado desde cero utilizando **HTML, CSS, JavaScript, Node.js y Socket.IO**. Su propósito no es ser un juego terminado, sino convertirse en la herramienta con la que se construirá el mundo completo de **Riveros Horror Game**.
 
-## Requisitos
+La filosofía del proyecto consiste en desarrollar primero un motor funcional que permita crear, editar y probar escenarios en tiempo real antes de comenzar el desarrollo completo del juego de terror.
 
-- Node.js 16+
-- Termux (Android) o cualquier terminal
-- Git
-- Cuenta en Render (para deploy)
-- Cuenta en GitHub
-
- ## Mobile First
-
- # riverojsx-engine
-
-> Mobile Game Engine developed entirely from Android using HTML, CSS and JavaScript.
+Todo el proyecto está pensado para funcionar tanto en navegador como en dispositivos móviles, con una interfaz sencilla y optimizada para pantallas táctiles.
 
 ---
 
-# Overview
+# 🚀 Estado actual
 
-**riverojsx-engine** is an independent game engine currently under development.
+Versión actual: **BETA 1.0**
 
-The long-term vision is to build an online first-person horror game, but before creating the final game, the priority is designing a solid, modular and scalable engine capable of supporting future projects.
+Actualmente el proyecto incluye:
 
-This repository represents the foundation of that engine.
-
-The objective is not simply to make a game, but to create a reusable architecture that allows new games, mechanics and multiplayer systems to be developed on top of the same codebase.
-
----
-
-# Current Development Stage
-
-Current Version:
-
-**Beta 1.0**
-
-Current priority:
-
-✅ Build the engine.
-
-❌ Not the final horror game.
-
-At this stage the project focuses on:
-
-- Menu system
-- Online infrastructure
-- Multiplayer rooms
-- Developer Mode
-- Map system
-- Modular architecture
-- Mobile optimization
-
-The horror gameplay will be developed after the engine reaches a stable version.
+- Sistema de menús.
+- Perfil de jugador.
+- Configuración.
+- Noticias (News).
+- Sistema de amigos.
+- Conexión mediante Socket.IO.
+- Partidas en solitario.
+- Creación y unión a salas multijugador.
+- Lobby multijugador.
+- Modo desarrollador.
+- Mundo de pruebas.
+- Cámara en primera persona.
+- Pantalla inmersiva.
+- Sistema básico de texturas.
+- Motor preparado para expansión.
 
 ---
 
-# Long-Term Vision
+# 🛠 Developer Mode
 
-The final objective of riverojsx-engine is to become the foundation of a complete multiplayer horror experience.
+El **Developer Mode** es actualmente la característica principal del proyecto.
 
-The future game will include:
+Su objetivo es permitir construir el mapa principal del juego directamente desde el propio motor sin necesidad de programas externos.
 
-- First-person gameplay
-- Online multiplayer
-- Open environments
-- Map creation
-- AI enemies
-- Survival mechanics
-- Persistent player profiles
-- Community-created maps
+Actualmente permite experimentar con la creación del mundo y servirá como base del escenario definitivo.
 
-Before reaching that point, every engine system must be completed and documented.
+## Objetivo
+
+Construir completamente el mapa del futuro **Riveros Horror Game** desde este editor.
+
+Una vez terminado y optimizado, este mismo sistema evolucionará para convertirse en un editor disponible para la comunidad.
 
 ---
 
-# Philosophy
+# 🌍 Visión del proyecto
 
-The engine follows several principles.
+La meta NO es únicamente desarrollar un juego.
 
-## Modular
+La visión consiste en construir un motor que permita:
 
-Every system must be independent.
+- Crear mundos abiertos.
+- Editar escenarios en tiempo real.
+- Construir estructuras.
+- Crear mapas.
+- Compartir mapas.
+- Jugar esos mapas en modo individual o multijugador.
 
-No module should depend unnecessarily on another.
-
----
-
-## Clean Code
-
-Readable code is more important than clever code.
-
-Small functions.
-
-Clear structure.
-
-Reusable components.
+El objetivo final es que el mapa oficial del juego sea construido utilizando este mismo motor.
 
 ---
 
-## Mobile First
+# 🌐 Funciones planeadas
 
-The engine is designed specifically for Android devices.
+Entre las funciones que aún se encuentran en desarrollo están:
 
-Portrait orientation.
-
-Fullscreen.
-
-Optimized for touch controls.
-
----
-
-## Progressive Development
-
-Features are implemented one system at a time.
-
-Architecture comes before content.
-
-The objective is to avoid rewriting large portions of the project in the future.
-
----
-
-# Current Modules
-
-The engine currently plans the following systems.
-
-- Menu
-- Profile
-- Friends
-- Multiplayer
-- Developer Mode
-- Maps
-- News
-- Settings
-- Online Networking
-- Server
-- Asset Management
-
-Each module is developed independently.
+- Guardado permanente de mapas en servidor.
+- Sincronización automática de mapas para todos los jugadores.
+- Descarga automática del mapa más reciente al entrar al juego.
+- Lista de jugadores registrados.
+- Estado En línea / Desconectado en tiempo real.
+- Sistema de construcción avanzado.
+- Objetos interactivos.
+- IA.
+- Sistema de iluminación.
+- Optimización del motor.
+- Sistema de físicas.
+- Animaciones.
+- Inventario.
+- Guardado en la nube.
 
 ---
 
-# Developer Mode
+# ⚠ Estado de desarrollo
 
-One of the main goals of the engine is providing an integrated world editor.
+Actualmente existen funciones implementadas parcialmente.
 
-The editor allows creating maps directly from the mobile device.
+## Mapas
 
-Current concept:
+El modo desarrollador ya puede crear mapas.
 
-- Open world
-- Creative mode
-- Fly mode
-- Block placement
-- Collision system
-- Save maps
-- Continue editing later
-- Publish maps for all players
+Sin embargo, todavía **los mapas no se sincronizan automáticamente entre todos los jugadores**.
 
-The editor is inspired by the simplicity of Minecraft while remaining optimized for mobile devices.
+Actualmente el objetivo es desarrollar el sistema para que:
+
+- un creador guarde un mapa;
+- el servidor lo almacene;
+- cualquier jugador pueda verlo al entrar al juego sin necesidad de descargar una actualización.
 
 ---
 
-# Multiplayer
+## Amigos
 
-The multiplayer architecture is server-based.
+Sistema de amigos con sincronización en tiempo real mediante Socket.IO:
 
-Features:
-
-- Room codes
-- 2 to 4 players
-- Real-time synchronization
-- Friend list
-- Online status
-- Automatic room destruction after match ends
-
-Rooms never remain stored after finishing.
-
-Each session is temporary.
+- cada jugador tiene un ID único de 8 dígitos (Perfil) para ser agregado;
+- solicitudes de amistad con aceptar/rechazar;
+- estado En línea / Desconectado en tiempo real;
+- desde dentro del mundo (Solo, Multijugador o Modo Desarrollador) se puede invitar
+  a un amigo en línea a unirse a la partida; si acepta, se une sin importar si
+  la sesión era Solo o Modo Desarrollador.
 
 ---
 
-# Documentation
+# 🎮 Objetivo principal
 
-The project uses documentation as an essential part of development.
+Antes de comenzar el desarrollo completo de Riveros Horror Game se pretende terminar un motor capaz de construir el escenario completo del juego.
 
-Main documents include:
+Este enfoque permitirá:
 
-- README.md
-- SPECIFICATION.md
-- MENU.md
-- MULTIPLAYER.md
-- DEVELOPER.md
-- MAPS.md
-- NETWORK.md
-- SERVER.md
-- CHANGELOG.md
-- ROADMAP.md
-
-Documentation is considered part of the project and must remain synchronized with the code.
+- desarrollar el mapa mientras se prueba el motor;
+- detectar errores antes de crear el juego completo;
+- reutilizar el motor en futuras versiones.
 
 ---
 
-# Development Workflow
+# 🔮 Visión a largo plazo
 
-Development follows this workflow:
+Cuando el motor sea estable se convertirá en la herramienta principal de desarrollo del universo de **Riveros Horror Game**.
 
-1. Design the module.
-2. Update documentation.
-3. Implement the code.
-4. Test locally using Acode.
-5. Move project to internal storage.
-6. Manage version control using Git in Termux.
-7. Push to GitHub.
-8. Deploy using Render.
-9. Build APK after verification.
+Posteriormente se añadirá un editor mucho más completo para que cualquier jugador pueda construir sus propios mapas y compartirlos con la comunidad.
+
+El objetivo final es disponer de un motor ligero, fácil de ampliar y completamente desarrollado desde cero.
 
 ---
 
-# Technologies
-
-Current stack:
-
-- HTML5
-- CSS3
-- JavaScript
-- LocalStorage
-- WebSocket (planned)
-- Node.js Server (planned)
-- Git
-- GitHub
-- Render
-
----
-
-# Future Goals
-
-Future milestones include:
-
-- Complete Developer Mode.
-- Stable multiplayer.
-- Dynamic map publishing.
-- Physics improvements.
-- AI system.
-- Inventory system.
-- Lighting system.
-- Sound engine.
-- Animation system.
-- First-person controller.
-- Complete Horror Game.
-
----
-
-# Project Status
-
-Current state:
-
-🚧 Active Development
-
-The engine is continuously evolving.
-
-Architecture and stability take priority over adding gameplay features.
-
----
-
-# Author
-
-Created and maintained by:
+# 👨‍💻 Desarrollador
 
 **riverojsx**
 
-Started in 2026.
+Proyecto desarrollado como parte del aprendizaje de programación, motores de juego, arquitectura de software y desarrollo multijugador en tiempo real.
 
-This project represents the beginning of a long-term vision to create a complete mobile game engine and eventually build an original online horror game powered entirely by that engine.
+---
 
-The engine is designed exclusively for Android mobile devices.
-
-Portrait orientation only.
-
-Fullscreen experience.
-
-Touch-first interface.
-
-Optimized for smartphones.
-
-Landscape mode is currently not supported.
+*"Primero construir el motor. Después construir el mundo."*

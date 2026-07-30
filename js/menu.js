@@ -138,29 +138,63 @@ const Menu = {
                     <button class="small-btn" id="edit-name-btn" onclick="Menu.toggleEditName()">EDITAR NOMBRE</button>
                     
                     <div class="divider"></div>
-                    
-                    <div class="section-title">Amigos (${App.player.friends.length})</div>
-                    <button class="menu-btn sub" onclick="App.showScreen('add_friend')">+ AÑADIR AMIGO</button>
-                    
-                    <div id="friends-list">
-                        ${this.renderFriendsList()}
-                    </div>
+
+                    <div id="requests-section">${this.renderFriendRequests()}</div>
+                    <div id="friends-section">${this.renderFriendsSection()}</div>
                 </div>
             </div>
+        `;
+        Friends.refresh();
+    },
+
+    // Vuelve a pintar solo las listas de solicitudes/amigos sin recargar
+    // toda la pantalla (se usa cuando llegan datos nuevos del servidor)
+    renderProfileLists() {
+        const req = document.getElementById('requests-section');
+        const fr = document.getElementById('friends-section');
+        if (req) req.innerHTML = this.renderFriendRequests();
+        if (fr) fr.innerHTML = this.renderFriendsSection();
+    },
+
+    renderFriendRequests() {
+        if (!Friends.pendingRequests || Friends.pendingRequests.length === 0) return '';
+        return `
+            <div class="section-title">Solicitudes pendientes (${Friends.pendingRequests.length})</div>
+            ${Friends.pendingRequests.map(r => `
+                <div class="friend-request-item">
+                    <span class="friend-name">${r.fromName}</span>
+                    <div class="friend-request-actions">
+                        <button class="small-btn accept" onclick="Friends.acceptRequest('${r.from}')">ACEPTAR</button>
+                        <button class="small-btn reject" onclick="Friends.rejectRequest('${r.from}')">RECHAZAR</button>
+                    </div>
+                </div>
+            `).join('')}
+            <div class="divider"></div>
+        `;
+    },
+
+    renderFriendsSection() {
+        return `
+            <div class="section-title">Amigos (${Friends.list.length})</div>
+            <button class="menu-btn sub" onclick="App.showScreen('add_friend')">+ AÑADIR AMIGO</button>
+            <div id="friends-list">${this.renderFriendsList()}</div>
         `;
     },
     
     renderFriendsList() {
-        if (App.player.friends.length === 0) {
-            return '<div class="empty-state">No tienes amigos aún</div>';
+        if (!Friends.list || Friends.list.length === 0) {
+            return '<div class="empty-state">No tienes amigos aún.<br>Añade uno con su ID de 8 dígitos.</div>';
         }
         
-        return App.player.friends.map(f => `
+        return Friends.list.map(f => `
             <div class="friend-item">
                 <span class="friend-name">${f.name}</span>
-                <span class="friend-status ${f.online ? 'online' : 'offline'}">
-                    ${f.online ? 'ACTIVO' : 'INACTIVO'}
-                </span>
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <span class="friend-status ${f.online ? 'online' : 'offline'}">
+                        ${f.online ? 'ACTIVO' : 'INACTIVO'}
+                    </span>
+                    <button class="friend-remove-btn" onclick="Friends.removeFriend('${f.id}')" aria-label="Eliminar amigo">✕</button>
+                </div>
             </div>
         `).join('');
     },
@@ -202,6 +236,8 @@ const Menu = {
     // ===== AÑADIR AMIGO =====
     showAddFriend() {
         const app = document.getElementById('app');
+        const rawId = App.player.id || '';
+        const formattedId = rawId.replace(/(\d{4})(\d{4})/, '$1 $2');
         app.innerHTML = `
             <div class="screen" id="screen-add-friend">
                 <div class="header">
@@ -210,16 +246,16 @@ const Menu = {
                     <div class="header-right"></div>
                 </div>
                 <div class="content">
-                    <div class="section-title">ID del jugador</div>
-                    <input type="text" class="add-friend-input" id="friend-id-input" 
-                           placeholder="Ej: usr_abc123def" maxlength="20">
-                    <button class="menu-btn" onclick="Menu.addFriend()">BUSCAR Y AÑADIR</button>
+                    <div class="section-title">ID del jugador (8 dígitos)</div>
+                    <input type="tel" inputmode="numeric" pattern="[0-9]*" class="add-friend-input" id="friend-id-input" 
+                           placeholder="Ej: 48213967" maxlength="8">
+                    <button class="menu-btn" onclick="Menu.addFriend()">ENVIAR SOLICITUD</button>
                     <div id="add-friend-result"></div>
                     
                     <div class="divider" style="margin-top:20px;"></div>
                     <div class="section-title">Tu ID</div>
-                    <div style="font-size:11px;color:#666;font-family:monospace;">${App.player.id}</div>
-                    <div style="font-size:10px;color:#444;margin-top:4px;">Comparte tu ID para que te agreguen</div>
+                    <div class="my-id-display">${formattedId}</div>
+                    <div style="font-size:10px;color:var(--text-faint);margin-top:4px;">Comparte tu ID para que te agreguen</div>
                 </div>
             </div>
         `;
@@ -227,39 +263,36 @@ const Menu = {
     
     addFriend() {
         const input = document.getElementById('friend-id-input');
-        const friendId = input.value.trim();
         const result = document.getElementById('add-friend-result');
+        const friendId = (input.value || '').trim();
         
-        if (!friendId || friendId === App.player.id) {
-            result.innerHTML = '<div class="error-msg">ID inválido</div>';
+        if (!/^\d{8}$/.test(friendId)) {
+            result.innerHTML = '<div class="error-msg">Ingresa un ID válido de 8 dígitos</div>';
+            return;
+        }
+        if (friendId === App.player.id) {
+            result.innerHTML = '<div class="error-msg">Ese es tu propio ID</div>';
+            return;
+        }
+        if (!App.socket || !App.socket.connected) {
+            result.innerHTML = '<div class="error-msg">Sin conexión al servidor</div>';
             return;
         }
         
-        if (App.player.friends.find(f => f.id === friendId)) {
-            result.innerHTML = '<div class="error-msg">Ya es tu amigo</div>';
-            return;
-        }
-        
-        // Simular búsqueda (en producción, el servidor validaría)
-        // Aquí generamos un nombre basado en el ID para demo
-        const fakeName = 'Player_' + friendId.substr(-4);
-        
-        const newFriend = {
-            id: friendId,
-            name: fakeName,
-            online: false
-        };
-        
-        App.player.friends.push(newFriend);
-        App.saveFriends();
-        
-        result.innerHTML = '<div style="font-size:11px;color:#4caf50;margin-top:8px;">✓ Amigo añadido</div>';
-        App.toast('Amigo añadido');
-        
-        // Notificar al servidor
-        if (App.socket) {
-            App.socket.emit('add_friend', { friendId: friendId, myId: App.player.id });
-        }
+        App.socket.emit('friend_request', {
+            fromId: App.player.id,
+            fromName: App.player.name,
+            toId: friendId
+        }, (res) => {
+            if (res && res.success) {
+                result.innerHTML = '<div style="font-size:11px;color:var(--success);margin-top:8px;">✓ ' + res.message + '</div>';
+                App.toast(res.message);
+                input.value = '';
+                Friends.refresh();
+            } else {
+                result.innerHTML = '<div class="error-msg">' + ((res && res.message) || 'No se pudo enviar la solicitud') + '</div>';
+            }
+        });
     },
     
     // ===== NOVEDADES =====
@@ -275,45 +308,30 @@ const Menu = {
                 <div class="content">
                     <div class="news-card">
                         <div class="news-header">
-                            <div class="news-avatar">📢</div>
+                            <div class="news-avatar">👥</div>
                             <div>
                                 <div class="news-author">riverojsx-engine</div>
-                                <div class="news-date">29 Jul 2026</div>
+                                <div class="news-date">30/07/2026</div>
                             </div>
                         </div>
                         <div class="news-text">
-                            El proyecto riverojsx está avanzando lentamente y ha traído el modo desarrollador convirtiéndolo en un motor de juego. 
-                            Ahora puedes construir tus propios mapas en 3D y compartirlos con todos los jugadores.
+                            Se trabaja en mejorar el sistema de amigos.
                         </div>
-                        <div class="news-tag">#VERSION BETA</div>
+                        <div class="news-tag">#AMIGOS</div>
                     </div>
                     
                     <div class="news-card">
                         <div class="news-header">
-                            <div class="news-avatar">🎮</div>
+                            <div class="news-avatar">🚀</div>
                             <div>
                                 <div class="news-author">riverojsx-engine</div>
-                                <div class="news-date">28 Jul 2026</div>
+                                <div class="news-date">19/07/2026</div>
                             </div>
                         </div>
                         <div class="news-text">
-                            Nueva actualización del motor gráfico. Se ha mejorado el rendimiento en dispositivos móviles y se ha añadido soporte para partidas multijugador hasta 4 jugadores.
+                            Nace el proyecto, riverojsx run for goals.
                         </div>
-                        <div class="news-tag">#MULTIPLAYER</div>
-                    </div>
-                    
-                    <div class="news-card">
-                        <div class="news-header">
-                            <div class="news-avatar">🛠️</div>
-                            <div>
-                                <div class="news-author">riverojsx-engine</div>
-                                <div class="news-date">25 Jul 2026</div>
-                            </div>
-                        </div>
-                        <div class="news-text">
-                            El modo desarrollador ya está disponible. Usa la clave de acceso para entrar y comienza a construir. Guarda tus mapas y otros jugadores podrán jugarlos.
-                        </div>
-                        <div class="news-tag">#MODO DESARROLLADOR</div>
+                        <div class="news-tag">#INICIO</div>
                     </div>
                 </div>
             </div>

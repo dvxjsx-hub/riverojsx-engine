@@ -174,15 +174,15 @@ body.immersive, body.immersive #app {
    Inspirado en menús de consola: la opción principal resalta en blanco y
    el resto queda atenuado en gris-azulado, sin recuadros ni bordes. */
 .menu-btn {
-    font-size: 13px;
+    font-size: 11px;
     font-weight: 700;
     color: var(--text-lo);
     background: none;
     border: none;
     text-align: left;
-    padding: 6px 0;
+    padding: 5px 0;
     cursor: pointer;
-    letter-spacing: 1.5px;
+    letter-spacing: 1.2px;
     text-transform: uppercase;
     transition: color 0.15s, transform 0.15s;
     width: 100%;
@@ -193,11 +193,11 @@ body.immersive, body.immersive #app {
 }
 
 .menu-btn.primary {
-    font-size: 18px;
+    font-size: 14px;
     font-weight: 800;
     color: var(--text-hi);
-    letter-spacing: 2px;
-    padding-bottom: 14px;
+    letter-spacing: 1.5px;
+    padding-bottom: 10px;
     text-shadow: 0 0 20px rgba(79, 195, 247, 0.35);
 }
 .menu-btn.primary:hover, .menu-btn.primary:active {
@@ -464,6 +464,54 @@ body.immersive, body.immersive #app {
     width: 100%;
     margin-bottom: 8px;
     outline: none;
+    letter-spacing: 2px;
+    text-align: center;
+}
+
+.my-id-display {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--accent-dim);
+    letter-spacing: 3px;
+    font-family: monospace;
+    margin-top: 4px;
+}
+
+.friend-request-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    margin-top: 6px;
+    background: rgba(79, 195, 247, 0.06);
+    border: 1px solid rgba(79, 195, 247, 0.18);
+    border-radius: 8px;
+}
+
+.friend-request-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.small-btn.accept {
+    color: var(--success);
+}
+
+.small-btn.reject {
+    color: var(--danger);
+}
+
+.friend-remove-btn {
+    background: none;
+    border: none;
+    color: var(--text-faint);
+    font-size: 12px;
+    padding: 2px 4px;
+    cursor: pointer;
+    line-height: 1;
+}
+.friend-remove-btn:active {
+    color: var(--danger);
 }
 
 /* ===== NOVEDADES ===== */

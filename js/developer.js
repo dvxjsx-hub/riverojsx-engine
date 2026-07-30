@@ -10,6 +10,12 @@ const Developer = {
     blockMeshes: [],
     groundMesh: null,
 
+    // Sesión compartida (Modo Desarrollador con amigos invitados)
+    roomCode: null,
+    otherPlayerMeshes: {},
+    lastUpdate: 0,
+    devSocketHandlers: {},
+
     // Jugador
     player: {
         x: 0, y: 3, z: 0,
@@ -53,7 +59,9 @@ const Developer = {
         { id: 'erase', icon: '✖', label: 'Borrar' }
     ],
 
-    enterDevMode() {
+    enterDevMode(data) {
+        data = data || {};
+
         // Reiniciar estado de controles por si venimos de otra sesión
         this.player = { x: 0, y: 3, z: 0, velocity: { x: 0, y: 0, z: 0 }, onGround: false, flying: false, noclip: false };
         this.lookTouchId = null;
@@ -62,6 +70,8 @@ const Developer = {
         this.creativePanelOpen = false;
         this.blocks = [];
         this.blockMeshes = [];
+        this.roomCode = data.joinRoom || null;
+        this.otherPlayerMeshes = {};
 
         const app = document.getElementById('app');
         app.innerHTML = `
@@ -71,7 +81,11 @@ const Developer = {
             <div class="game-overlay">
                 <div class="fps-counter" id="fps-counter" style="display:none;">60 FPS</div>
                 <div class="hud-cluster">
+                    <div class="hud-cluster-row" id="dev-room-row">
+                        ${this.roomCode ? `<div class="hud-chip">COMPARTIDO</div><div class="hud-chip">SALA ${this.roomCode}</div>` : ''}
+                    </div>
                     <div class="hud-cluster-row">
+                        <button class="creative-toggle-btn" onclick="Friends.openInvitePanel('dev')">👥 AMIGOS</button>
                         <button class="creative-toggle-btn" id="creative-btn" onclick="Developer.toggleCreativePanel()">CREATIVO</button>
                         <button class="exit-game-btn" onclick="Developer.exitDevMode()">SALIR</button>
                     </div>
@@ -131,9 +145,16 @@ const Developer = {
         this.setupControls();
         this.setupJoystick();
         this.setupActionButtons();
-        this.loadLastMap();
+
+        if (this.roomCode) {
+            this.setupDevMultiplayer();
+            App.toast('Conectando con tu amigo...');
+        } else {
+            this.loadLastMap();
+            App.toast('Toca la pantalla para construir · Arrastra para mirar');
+        }
+
         App.enterImmersive();
-        App.toast('Toca la pantalla para construir · Arrastra para mirar');
         this.animate();
     },
 
@@ -227,6 +248,96 @@ const Developer = {
         this.scene.add(this.playerMesh);
     },
 
+    // ===== SESIÓN COMPARTIDA (invitar amigos al Modo Desarrollador) =====
+    // Convierte una sesión en solitario en una sesión compartida cuando se
+    // invita a un amigo desde dentro del mundo (sin reiniciar la escena).
+    becomeSharedHost(room) {
+        if (this.roomCode) return;
+        this.roomCode = room;
+
+        const row = document.getElementById('dev-room-row');
+        if (row) {
+            row.innerHTML = `<div class="hud-chip">COMPARTIDO</div><div class="hud-chip">SALA ${room}</div>`;
+        }
+
+        this.setupDevMultiplayer();
+    },
+
+    setupDevMultiplayer() {
+        if (!this.roomCode || !App.socket) return;
+
+        // Evita listeners duplicados si esta función se llama más de una vez
+        this.clearDevMultiplayerListeners();
+
+        const handlers = {
+            player_moved: (data) => this.updateOtherPlayer(data),
+            player_joined_game: (data) => {
+                App.toast(data.name + ' se unió a construir');
+                this.addOtherPlayer(data);
+                // Si ya estábamos en la sala, le mandamos una foto del mapa actual
+                App.socket.emit('dev_sync_state', { room: this.roomCode, toId: data.id, blocks: this.blocks });
+            },
+            player_left_game: (data) => this.removeOtherPlayer(data.id),
+            dev_state_sync: (data) => {
+                this.clearBlocks();
+                (data.blocks || []).forEach(b => this.placeBlock(b.x, b.y, b.z, b.type, true));
+                App.toast('Mapa del anfitrión cargado · ' + (data.blocks || []).length + ' bloques');
+            },
+            dev_block_placed: (data) => this.placeBlock(data.x, data.y, data.z, data.type, true),
+            dev_block_removed: (data) => this.removeBlockAt(data.x, data.y, data.z, true),
+            game_ended: () => {
+                App.toast('La sesión compartida terminó');
+                this.roomCode = null;
+                this.clearDevMultiplayerListeners();
+            }
+        };
+
+        Object.entries(handlers).forEach(([event, fn]) => App.socket.on(event, fn));
+        this.devSocketHandlers = handlers;
+
+        App.socket.emit('join_game', {
+            room: this.roomCode,
+            id: App.player.id,
+            name: App.player.name
+        });
+    },
+
+    clearDevMultiplayerListeners() {
+        if (!App.socket) return;
+        Object.entries(this.devSocketHandlers).forEach(([event, fn]) => App.socket.off(event, fn));
+        this.devSocketHandlers = {};
+    },
+
+    addOtherPlayer(data) {
+        if (this.otherPlayerMeshes[data.id]) return;
+
+        const geo = new THREE.BoxGeometry(0.6, 1.8, 0.6);
+        const mat = new THREE.MeshStandardMaterial({ color: 0xffaa00 });
+        const mesh = new THREE.Mesh(geo, mat);
+        mesh.position.set(data.x || 0, 0.9, data.z || 0);
+        mesh.castShadow = true;
+
+        this.scene.add(mesh);
+        this.otherPlayerMeshes[data.id] = mesh;
+    },
+
+    updateOtherPlayer(data) {
+        if (!this.otherPlayerMeshes[data.id]) {
+            this.addOtherPlayer(data);
+            return;
+        }
+        const mesh = this.otherPlayerMeshes[data.id];
+        mesh.position.set(data.x, 0.9, data.z);
+        mesh.rotation.y = data.rotation || 0;
+    },
+
+    removeOtherPlayer(id) {
+        if (this.otherPlayerMeshes[id]) {
+            this.scene.remove(this.otherPlayerMeshes[id]);
+            delete this.otherPlayerMeshes[id];
+        }
+    },
+
     // ===== BLOQUES =====
     getBlockConfig(type) {
         const configs = {
@@ -239,7 +350,7 @@ const Developer = {
         return configs[type] || configs.wall;
     },
 
-    placeBlock(x, y, z, type) {
+    placeBlock(x, y, z, type, fromNetwork) {
         const config = this.getBlockConfig(type);
 
         const existing = this.blocks.find(b =>
@@ -263,11 +374,18 @@ const Developer = {
         this.scene.add(mesh);
         this.blockMeshes.push(mesh);
         this.blocks.push({ x, y, z, type });
+
+        // Si estamos en una sesión compartida y el bloque lo colocamos
+        // nosotros (no llegó ya sincronizado), lo retransmitimos
+        if (!fromNetwork && this.roomCode && App.socket) {
+            App.socket.emit('dev_block_place', { room: this.roomCode, x, y, z, type });
+        }
     },
 
-    removeBlock(mesh) {
+    removeBlock(mesh, fromNetwork) {
         const idx = this.blockMeshes.indexOf(mesh);
         if (idx > -1) {
+            const pos = mesh.position.clone();
             this.blockMeshes.splice(idx, 1);
             const bIdx = this.blocks.findIndex(b =>
                 Math.abs(b.x - mesh.position.x) < 0.1 &&
@@ -278,7 +396,22 @@ const Developer = {
             this.scene.remove(mesh);
             mesh.geometry.dispose();
             mesh.material.dispose();
+
+            if (!fromNetwork && this.roomCode && App.socket) {
+                App.socket.emit('dev_block_remove', { room: this.roomCode, x: pos.x, y: pos.y, z: pos.z });
+            }
         }
+    },
+
+    // Busca el bloque en una posición (usado al recibir una eliminación
+    // desde la red, donde solo tenemos las coordenadas, no el mesh)
+    removeBlockAt(x, y, z, fromNetwork) {
+        const mesh = this.blockMeshes.find(m =>
+            Math.abs(m.position.x - x) < 0.1 &&
+            Math.abs(m.position.y - y) < 0.1 &&
+            Math.abs(m.position.z - z) < 0.1
+        );
+        if (mesh) this.removeBlock(mesh, fromNetwork);
     },
 
     clearBlocks() {
@@ -585,6 +718,7 @@ const Developer = {
         this.animationId = requestAnimationFrame(() => this.animate());
 
         const delta = Math.min(this.clock.getDelta(), 0.1);
+        const now = performance.now();
 
         if (App.config.showFPS) {
             const fps = Math.round(1 / delta);
@@ -593,6 +727,18 @@ const Developer = {
         }
 
         this.updatePlayer(delta);
+
+        // Enviar posición en sesión compartida (30 veces por segundo)
+        if (this.roomCode && App.socket && now - this.lastUpdate > 33) {
+            this.lastUpdate = now;
+            App.socket.emit('player_move', {
+                room: this.roomCode,
+                id: App.player.id,
+                x: this.player.x,
+                z: this.player.z,
+                rotation: this.camera.rotation.y
+            });
+        }
 
         this.renderer.render(this.scene, this.camera);
     },
@@ -674,6 +820,12 @@ const Developer = {
     },
 
     exitDevMode() {
+        // Notificar al servidor que salimos de la sesión compartida
+        if (this.roomCode && App.socket) {
+            App.socket.emit('leave_game', { room: this.roomCode, id: App.player.id });
+        }
+        this.clearDevMultiplayerListeners();
+
         if (this.animationId) {
             cancelAnimationFrame(this.animationId);
             this.animationId = null;
@@ -689,6 +841,8 @@ const Developer = {
         this.renderer = null;
         this.blocks = [];
         this.blockMeshes = [];
+        this.roomCode = null;
+        this.otherPlayerMeshes = {};
 
         App.exitImmersive();
 

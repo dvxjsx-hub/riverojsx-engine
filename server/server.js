@@ -3,6 +3,8 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
+const accounts = require('./accounts');
+const friends = require('./friends');
 
 const app = express();
 const server = http.createServer(app);
@@ -30,6 +32,15 @@ function generateId() {
     return 'srv_' + Math.random().toString(36).substr(2, 9);
 }
 
+// Busca el socket actualmente conectado de un jugador a partir de su ID
+// de 8 dígitos (necesario porque onlinePlayers está indexado por socket.id)
+function findSocketIdByPlayerId(id) {
+    for (const [socketId, p] of Object.entries(onlinePlayers)) {
+        if (p.id === id) return socketId;
+    }
+    return null;
+}
+
 // ===== SOCKET.IO =====
 io.on('connection', (socket) => {
     console.log('Jugador conectado:', socket.id);
@@ -42,6 +53,10 @@ io.on('connection', (socket) => {
             socketId: socket.id,
             room: null
         };
+
+        // Registrar/actualizar la cuenta persistente (necesario para poder
+        // validar el ID al recibir una solicitud de amistad)
+        accounts.register(onlinePlayers[socket.id].id, onlinePlayers[socket.id].name);
         
         // Notificar a amigos que estamos online
         socket.broadcast.emit('friend_status', {
@@ -255,10 +270,172 @@ io.on('connection', (socket) => {
     });
     
     // ===== AMIGOS =====
-    socket.on('add_friend', (data) => {
-        // En producción: validar que el friendId existe
-        // Por ahora solo confirmamos
-        socket.emit('friend_added', { friendId: data.friendId });
+    socket.on('get_friends', (data, callback) => {
+        if (typeof callback !== 'function') return;
+        const list = friends.friendIds(data.id).map(fid => {
+            const acc = accounts.get(fid);
+            return {
+                id: fid,
+                name: acc ? acc.name : 'Jugador',
+                online: !!findSocketIdByPlayerId(fid)
+            };
+        });
+        callback({ success: true, friends: list });
+    });
+
+    socket.on('get_friend_requests', (data, callback) => {
+        if (typeof callback !== 'function') return;
+        callback({ success: true, requests: friends.pendingRequests(data.id) });
+    });
+
+    socket.on('friend_request', (data, callback) => {
+        const cb = typeof callback === 'function' ? callback : () => {};
+        const toId = (data.toId || '').trim();
+
+        if (!/^\d{8}$/.test(toId)) {
+            cb({ success: false, message: 'ID inválido (deben ser 8 dígitos)' });
+            return;
+        }
+        if (!accounts.exists(toId)) {
+            cb({ success: false, message: 'No existe ningún jugador con ese ID' });
+            return;
+        }
+
+        const result = friends.sendRequest(data.fromId, data.fromName, toId);
+        cb(result);
+
+        const targetSocket = findSocketIdByPlayerId(toId);
+        if (targetSocket) {
+            if (result.friendId) {
+                // Solicitud cruzada: se aceptó automáticamente
+                io.to(targetSocket).emit('friend_added', { id: data.fromId, name: data.fromName });
+            } else if (result.success) {
+                io.to(targetSocket).emit('friend_request_received', { fromId: data.fromId, fromName: data.fromName });
+            }
+        }
+    });
+
+    socket.on('friend_request_accept', (data, callback) => {
+        const cb = typeof callback === 'function' ? callback : () => {};
+        const result = friends.acceptRequest(data.myId, data.fromId);
+        cb(result);
+
+        if (result.success) {
+            const myAccount = accounts.get(data.myId);
+            const fromSocket = findSocketIdByPlayerId(data.fromId);
+            if (fromSocket) {
+                io.to(fromSocket).emit('friend_added', { id: data.myId, name: myAccount ? myAccount.name : 'Jugador' });
+            }
+        }
+    });
+
+    socket.on('friend_request_reject', (data, callback) => {
+        const cb = typeof callback === 'function' ? callback : () => {};
+        cb(friends.rejectRequest(data.myId, data.fromId));
+    });
+
+    socket.on('remove_friend', (data, callback) => {
+        const cb = typeof callback === 'function' ? callback : () => {};
+        cb(friends.removeFriend(data.myId, data.friendId));
+        const otherSocket = findSocketIdByPlayerId(data.friendId);
+        if (otherSocket) io.to(otherSocket).emit('friend_removed', { id: data.myId });
+    });
+
+    // ===== INVITACIONES DENTRO DEL MUNDO =====
+    // Un jugador que ya está jugando (Solo, Multiplayer o Modo Desarrollador)
+    // puede invitar a un amigo en línea a unirse. Si no existía una sala
+    // (caso de Solo o Desarrollador en solitario), se crea una sobre la
+    // marcha para alojar la sesión compartida.
+    socket.on('send_invite', (data, callback) => {
+        const cb = typeof callback === 'function' ? callback : () => {};
+        const { fromId, fromName, toId, kind, map } = data;
+
+        if (!friends.areFriends(fromId, toId)) {
+            cb({ success: false, message: 'Solo puedes invitar a tus amigos' });
+            return;
+        }
+
+        const targetSocket = findSocketIdByPlayerId(toId);
+        if (!targetSocket) {
+            cb({ success: false, message: 'Tu amigo no está en línea' });
+            return;
+        }
+
+        let room = data.room;
+        if (!room || !rooms[room]) {
+            room = generateRoomCode();
+            while (rooms[room]) room = generateRoomCode();
+
+            rooms[room] = {
+                code: room,
+                hostId: fromId,
+                hostSocket: socket.id,
+                players: [{ id: fromId, name: fromName, socketId: socket.id, ready: true, isHost: true }],
+                map: map || 'default',
+                kind: kind || 'game',
+                gameActive: true,
+                createdAt: Date.now()
+            };
+            socket.join(room);
+            if (onlinePlayers[socket.id]) onlinePlayers[socket.id].room = room;
+        }
+
+        io.to(targetSocket).emit('invite_received', {
+            fromId, fromName, room, kind: kind || 'game', map: rooms[room].map
+        });
+
+        cb({ success: true, room });
+    });
+
+    socket.on('respond_invite', (data, callback) => {
+        const cb = typeof callback === 'function' ? callback : () => {};
+        const { room, accepted, toId, toName, fromId, kind } = data;
+        const inviterSocket = findSocketIdByPlayerId(fromId);
+
+        if (!accepted) {
+            if (inviterSocket) io.to(inviterSocket).emit('invite_declined', { toName });
+            cb({ success: true });
+            return;
+        }
+
+        const roomData = rooms[room];
+        if (!roomData) {
+            cb({ success: false, message: 'La invitación ya no está disponible' });
+            return;
+        }
+
+        if (!roomData.players.find(p => p.id === toId)) {
+            if (roomData.players.length >= 4) {
+                cb({ success: false, message: 'La sala está llena' });
+                return;
+            }
+            roomData.players.push({ id: toId, name: toName, socketId: socket.id, ready: true, isHost: false });
+        }
+        socket.join(room);
+        if (onlinePlayers[socket.id]) onlinePlayers[socket.id].room = room;
+
+        if (inviterSocket) io.to(inviterSocket).emit('invite_accepted', { toId, toName, room });
+
+        cb({ success: true, room, kind: roomData.kind || kind, map: roomData.map });
+    });
+
+    // ===== MODO DESARROLLADOR COMPARTIDO =====
+    // Los bloques no se guardan en el servidor: viajan como un simple relay
+    // entre los jugadores de la misma sala (el anfitrión envía una foto del
+    // estado actual a quien se une, y luego cada edición se retransmite).
+    socket.on('dev_block_place', (data) => {
+        socket.to(data.room).emit('dev_block_placed', { x: data.x, y: data.y, z: data.z, type: data.type });
+    });
+
+    socket.on('dev_block_remove', (data) => {
+        socket.to(data.room).emit('dev_block_removed', { x: data.x, y: data.y, z: data.z });
+    });
+
+    socket.on('dev_sync_state', (data) => {
+        const targetSocket = findSocketIdByPlayerId(data.toId);
+        if (targetSocket) {
+            io.to(targetSocket).emit('dev_state_sync', { blocks: data.blocks });
+        }
     });
     
     // ===== DESCONECTAR =====
