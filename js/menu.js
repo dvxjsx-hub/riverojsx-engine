@@ -441,7 +441,7 @@ const Menu = {
         const input = document.getElementById('dev-key-input');
         const error = document.getElementById('dev-key-error');
         
-        if (input.value === 'admin3108') {
+        if (input.value === '1000000') {
             App.showScreen('dev_mode');
         } else {
             error.innerHTML = '<div class="error-msg">Clave incorrecta</div>';

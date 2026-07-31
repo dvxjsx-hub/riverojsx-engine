@@ -906,10 +906,9 @@ body.immersive, body.immersive #app {
 /* ===== JOYSTICK VIRTUAL (izquierda) ===== */
 .joystick-zone {
     position: fixed;
-    left: 0; bottom: 0;
-    width: 42%;
-    max-width: 320px;
-    height: 62%;
+    left: 0; top: 0;
+    width: 50%;
+    height: 100%;
     z-index: 101;
     touch-action: none;
 }

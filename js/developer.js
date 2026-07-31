@@ -22,7 +22,8 @@ const Developer = {
         velocity: { x: 0, y: 0, z: 0 },
         onGround: false,
         flying: false,
-        noclip: false
+        noclip: false,
+        creativeMode: false
     },
 
     SPEED: 5,
@@ -43,6 +44,7 @@ const Developer = {
     lookMoved: false,
     joystickVector: { x: 0, y: 0 },
     jumpPressed: false,
+    jumpHeld: false,
     descendPressed: false,
     creativePanelOpen: false,
 
@@ -63,7 +65,7 @@ const Developer = {
         data = data || {};
 
         // Reiniciar estado de controles por si venimos de otra sesión
-        this.player = { x: 0, y: 3, z: 0, velocity: { x: 0, y: 0, z: 0 }, onGround: false, flying: false, noclip: false };
+        this.player = { x: 0, y: 3, z: 0, velocity: { x: 0, y: 0, z: 0 }, onGround: false, flying: false, noclip: false, creativeMode: false };
         this.lookTouchId = null;
         this.lookLast = null;
         this.joystickVector = { x: 0, y: 0 };
@@ -123,6 +125,10 @@ const Developer = {
                         <button class="panel-close-btn" onclick="Developer.toggleCreativePanel()">✕</button>
                     </div>
                     <div class="creative-option-row">
+                        <span>Modo Creativo</span>
+                        <button class="toggle-pill" id="panel-creative-btn" onclick="Developer.toggleCreativeMode()">OFF</button>
+                    </div>
+                    <div class="creative-option-row">
                         <span>Volar (Fly)</span>
                         <button class="toggle-pill" id="panel-fly-btn" onclick="Developer.toggleFly()">OFF</button>
                     </div>
@@ -132,7 +138,7 @@ const Developer = {
                     </div>
                     <div class="divider-light"></div>
                     <button class="panel-action-btn" onclick="Developer.saveCurrentMap()">💾 GUARDAR MAPA</button>
-                    <button class="panel-action-btn" onclick="Developer.loadLastMap()">📂 CARGAR ÚLTIMO</button>
+                    <button class="panel-action-btn" onclick="Developer.publishMap()">🌐 PUBLICAR MAPA</button>
                 </div>
             </div>
         `;
@@ -165,8 +171,8 @@ const Developer = {
 
         // Escena
         this.scene = new THREE.Scene();
-        this.scene.background = App.createSkyTexture('#3f8fd6', '#cdeafb');
-        this.scene.fog = new THREE.Fog(0xbfe3f7, 25, 110);
+        this.scene.background = App.createSkyTexture('#000000', '#000000', '#000000');
+        this.scene.fog = new THREE.Fog(0x000000, 35, 130);
 
         // Cámara
         this.camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
@@ -180,28 +186,27 @@ const Developer = {
         this.renderer.shadowMap.enabled = true;
         container.appendChild(this.renderer.domElement);
 
-        // Luces: misma cantidad que antes (ambiente + direccional), ahora
-        // hemisférica para un degradado de color más agradable, sin sumar
-        // luces adicionales.
-        const hemi = new THREE.HemisphereLight(0xaee2ff, 0x4f8f3d, 0.65);
+        // Luces: misma cantidad que antes (ambiente + direccional), con
+        // tono frío nocturno acorde al nuevo cielo negro
+        const hemi = new THREE.HemisphereLight(0x7f8fa6, 0x2a2a2a, 0.55);
         this.scene.add(hemi);
 
-        const dirLight = new THREE.DirectionalLight(0xfff3df, 0.8);
+        const dirLight = new THREE.DirectionalLight(0xcdd8ff, 0.7);
         dirLight.position.set(50, 100, 50);
         dirLight.castShadow = true;
         dirLight.shadow.mapSize.width = 1024;
         dirLight.shadow.mapSize.height = 1024;
         this.scene.add(dirLight);
 
-        // Cuadrícula sutil para guiar la construcción (sin dominar la escena)
-        const gridHelper = new THREE.GridHelper(100, 100, 0xffffff, 0xffffff);
+        // Cuadrícula gris tipo motor gráfico: cada línea representa 1 metro
+        const gridHelper = new THREE.GridHelper(100, 100, 0x777777, 0x444444);
         gridHelper.material.transparent = true;
-        gridHelper.material.opacity = 0.08;
+        gridHelper.material.opacity = 0.5;
         gridHelper.position.y = 0.01;
         this.scene.add(gridHelper);
 
-        // Piso con textura tipo césped
-        const groundTex = App.createGroundTexture();
+        // Piso gris limpio (sin césped)
+        const groundTex = App.createGroundTexture('#3a3a3a', '#333333', '#434343');
         const planeGeo = new THREE.PlaneGeometry(240, 240);
         const planeMat = new THREE.MeshStandardMaterial({ map: groundTex, roughness: 0.95 });
         const plane = new THREE.Mesh(planeGeo, planeMat);
@@ -210,13 +215,28 @@ const Developer = {
         this.scene.add(plane);
         this.groundMesh = plane;
 
-        // Nubes simples
-        this.createClouds();
+        // Luna decorativa (en vez de nubes)
+        this.createMoon();
 
         // Personaje simple (cubo rojo)
         this.createPlayerMesh();
 
         window.addEventListener('resize', () => this.onResize());
+    },
+
+    createMoon() {
+        const geo = new THREE.SphereGeometry(4, 24, 24);
+        const mat = new THREE.MeshBasicMaterial({ color: 0xf2f2e6 });
+        const moon = new THREE.Mesh(geo, mat);
+        moon.position.set(-40, 45, -70);
+        this.scene.add(moon);
+
+        // Halo suave alrededor de la luna
+        const glowGeo = new THREE.SphereGeometry(6, 24, 24);
+        const glowMat = new THREE.MeshBasicMaterial({ color: 0xf2f2e6, transparent: true, opacity: 0.15 });
+        const glow = new THREE.Mesh(glowGeo, glowMat);
+        glow.position.copy(moon.position);
+        this.scene.add(glow);
     },
 
     createClouds() {
@@ -480,7 +500,8 @@ const Developer = {
     },
 
     // Coloca/quita un bloque usando la mirilla central de la pantalla,
-    // igual que la mecánica clásica de Minecraft.
+    // igual que la mecánica clásica de Minecraft, siempre alineado a una
+    // cuadrícula de 1 metro (sin importar el grosor del bloque vecino).
     handleBuildTap() {
         this.raycaster.setFromCamera({ x: 0, y: 0 }, this.camera);
 
@@ -494,21 +515,37 @@ const Developer = {
             return;
         }
 
+        const newConfig = this.getBlockConfig(this.selectedTool);
+
         if (intersects.length > 0) {
             const hit = intersects[0];
             const normal = hit.face.normal;
-            const pos = hit.object.position.clone().add(
-                new THREE.Vector3(normal.x, normal.y, normal.z)
-            );
+            const hitConfig = this.getBlockConfig(hit.object.userData.type);
+
+            // Separación según el eje golpeado, usando el grosor real de
+            // cada bloque (piso/techo más delgados, puerta más alta, etc.)
+            // para que queden pegados sin huecos ni encimados.
+            const axis = Math.abs(normal.x) > 0.5 ? 0 : (Math.abs(normal.y) > 0.5 ? 1 : 2);
+            const offset = hitConfig.size[axis] / 2 + newConfig.size[axis] / 2;
+
+            const pos = hit.object.position.clone();
+            pos.x += normal.x * offset;
+            pos.y += normal.y * offset;
+            pos.z += normal.z * offset;
+
+            // La cuadrícula horizontal siempre queda en metros enteros
+            pos.x = Math.round(pos.x);
+            pos.z = Math.round(pos.z);
+
             this.placeBlock(pos.x, pos.y, pos.z, this.selectedTool);
         } else if (this.groundMesh) {
             const floorHit = this.raycaster.intersectObject(this.groundMesh);
             if (floorHit.length > 0) {
-                const pos = floorHit[0].point;
+                const point = floorHit[0].point;
                 this.placeBlock(
-                    Math.round(pos.x),
-                    Math.round(pos.y + 0.5),
-                    Math.round(pos.z),
+                    Math.round(point.x),
+                    newConfig.size[1] / 2,
+                    Math.round(point.z),
                     this.selectedTool
                 );
             }
@@ -588,10 +625,12 @@ const Developer = {
             const press = (e) => {
                 e.preventDefault();
                 this.jumpPressed = true;
+                this.jumpHeld = true;
                 jumpBtn.classList.add('pressed');
             };
             const release = (e) => {
                 if (e) e.preventDefault();
+                this.jumpHeld = false;
                 jumpBtn.classList.remove('pressed');
             };
             jumpBtn.addEventListener('touchstart', press, { passive: false });
@@ -666,6 +705,28 @@ const Developer = {
         if (btn) btn.classList.toggle('active', this.creativePanelOpen);
     },
 
+    // Modo Creativo: activa Fly + Noclip juntos con un solo botón.
+    // Al desactivarlo, vuelve al movimiento normal.
+    toggleCreativeMode() {
+        this.player.creativeMode = !this.player.creativeMode;
+        this.player.flying = this.player.creativeMode;
+        this.player.noclip = this.player.creativeMode;
+
+        const creativeBtn = document.getElementById('panel-creative-btn');
+        const flyBtn = document.getElementById('panel-fly-btn');
+        const noclipBtn = document.getElementById('panel-noclip-btn');
+        if (creativeBtn) { creativeBtn.textContent = this.player.creativeMode ? 'ON' : 'OFF'; creativeBtn.classList.toggle('on', this.player.creativeMode); }
+        if (flyBtn) { flyBtn.textContent = this.player.flying ? 'ON' : 'OFF'; flyBtn.classList.toggle('on', this.player.flying); }
+        if (noclipBtn) { noclipBtn.textContent = this.player.noclip ? 'ON' : 'OFF'; noclipBtn.classList.toggle('on', this.player.noclip); }
+
+        const jumpLabel = document.getElementById('jump-btn-label');
+        const descendStack = document.getElementById('descend-stack');
+        if (jumpLabel) jumpLabel.textContent = this.player.flying ? 'SUBIR' : 'SALTAR';
+        if (descendStack) descendStack.style.display = this.player.flying ? 'flex' : 'none';
+
+        App.toast(this.player.creativeMode ? 'Modo Creativo activado' : 'Modo Creativo desactivado · movimiento normal');
+    },
+
     toggleFly() {
         this.player.flying = !this.player.flying;
         this.player.noclip = this.player.flying;
@@ -691,7 +752,7 @@ const Developer = {
         App.toast(this.player.noclip ? 'Noclip activado' : 'Noclip desactivado');
     },
 
-    // ===== GUARDAR/CARGAR =====
+    // ===== GUARDAR/PUBLICAR =====
     saveCurrentMap() {
         if (this.blocks.length === 0) {
             App.toast('No hay bloques para guardar');
@@ -700,6 +761,23 @@ const Developer = {
 
         App.saveMap(this.currentMapName, this.blocks);
         App.toast(`Mapa "${this.currentMapName}" guardado · ${this.blocks.length} bloques`);
+    },
+
+    // Publica el mapa actual en la sección MAPAS para todos los jugadores.
+    // Si ya existía una versión publicada con este nombre, se actualiza
+    // en vez de crear un mapa duplicado (lo resuelve el servidor).
+    publishMap() {
+        if (this.blocks.length === 0) {
+            App.toast('No hay bloques para publicar');
+            return;
+        }
+        if (!App.socket || !App.socket.connected) {
+            App.toast('Sin conexión al servidor');
+            return;
+        }
+
+        App.publishMap(this.currentMapName, this.blocks);
+        App.toast(`Mapa "${this.currentMapName}" publicado en MAPAS`);
     },
 
     loadLastMap() {
@@ -749,9 +827,10 @@ const Developer = {
         this.applyJoystickMovement();
 
         if (p.flying) {
-            // Volar: el botón "SUBIR" asciende, el botón "▼" desciende
+            // Volar: el botón "SUBIR" asciende mientras se mantiene
+            // presionado, igual de fluido que "BAJAR"
             let vy = 0;
-            if (this.jumpPressed) vy = this.FLY_SPEED;
+            if (this.jumpHeld) vy = this.FLY_SPEED;
             else if (this.descendPressed) vy = -this.FLY_SPEED;
             p.velocity.y = vy;
 
@@ -769,6 +848,8 @@ const Developer = {
                 p.velocity.y -= this.GRAVITY * delta;
             }
 
+            const prevY = p.y; // altura antes de mover este cuadro
+
             p.x += p.velocity.x * delta;
             p.z += p.velocity.z * delta;
             p.y += p.velocity.y * delta;
@@ -781,23 +862,10 @@ const Developer = {
                 p.onGround = false;
             }
 
-            // Colisiones con bloques (simple AABB)
+            // Colisión sólida con todos los bloques (pared, piso, techo,
+            // puerta, ventana): se puede caminar encima y no se atraviesan
             if (!p.noclip) {
-                this.blockMeshes.forEach(mesh => {
-                    const dx = Math.abs(p.x - mesh.position.x);
-                    const dy = Math.abs(p.y + 0.9 - mesh.position.y);
-                    const dz = Math.abs(p.z - mesh.position.z);
-
-                    if (dx < 0.8 && dy < 1 && dz < 0.8) {
-                        if (dx > dz) {
-                            p.x = p.x > mesh.position.x ? mesh.position.x + 0.8 : mesh.position.x - 0.8;
-                        } else {
-                            p.z = p.z > mesh.position.z ? mesh.position.z + 0.8 : mesh.position.z - 0.8;
-                        }
-                        p.velocity.x = 0;
-                        p.velocity.z = 0;
-                    }
-                });
+                this.resolveBlockCollisions(prevY);
             }
         }
 
@@ -807,6 +875,69 @@ const Developer = {
         this.camera.position.set(p.x, p.y + 1.6, p.z);
         if (this.playerMesh) {
             this.playerMesh.position.set(p.x, p.y + 0.9, p.z);
+        }
+    },
+
+    // Resuelve colisiones jugador-bloque en dos pasadas: primero vertical
+    // (aterrizar encima de un bloque o golpear uno por debajo al saltar),
+    // luego horizontal (paredes/puertas/ventanas bloquean el paso).
+    // Todos los tipos de bloque son sólidos, sin distinción.
+    resolveBlockCollisions(prevY) {
+        const p = this.player;
+        const RADIUS = 0.32;   // ancho del jugador
+        const HEIGHT = 1.8;    // altura del jugador (desde los pies)
+
+        // --- Paso 1: eje vertical ---
+        for (const mesh of this.blockMeshes) {
+            const config = this.getBlockConfig(mesh.userData.type);
+            const [sx, sy, sz] = config.size;
+            const bx = mesh.position.x, by = mesh.position.y, bz = mesh.position.z;
+            const bMinX = bx - sx / 2, bMaxX = bx + sx / 2;
+            const bMinY = by - sy / 2, bMaxY = by + sy / 2;
+            const bMinZ = bz - sz / 2, bMaxZ = bz + sz / 2;
+
+            const withinX = p.x + RADIUS > bMinX && p.x - RADIUS < bMaxX;
+            const withinZ = p.z + RADIUS > bMinZ && p.z - RADIUS < bMaxZ;
+            if (!withinX || !withinZ) continue;
+
+            const feet = p.y, head = p.y + HEIGHT;
+            if (feet >= bMaxY || head <= bMinY) continue;
+
+            const prevFeet = prevY;
+            if (prevFeet >= bMaxY - 0.05 && p.velocity.y <= 0) {
+                // Veníamos de arriba: aterrizar sobre el bloque
+                p.y = bMaxY;
+                p.velocity.y = 0;
+                p.onGround = true;
+            } else if (prevFeet + HEIGHT <= bMinY + 0.05 && p.velocity.y > 0) {
+                // Veníamos de abajo: golpear el bloque con la cabeza
+                p.y = bMinY - HEIGHT;
+                p.velocity.y = 0;
+            }
+        }
+
+        // --- Paso 2: eje horizontal (empuje fuera del bloque) ---
+        for (const mesh of this.blockMeshes) {
+            const config = this.getBlockConfig(mesh.userData.type);
+            const [sx, sy, sz] = config.size;
+            const bx = mesh.position.x, by = mesh.position.y, bz = mesh.position.z;
+
+            const feet = p.y, head = p.y + HEIGHT;
+            if (feet >= by + sy / 2 - 0.02 || head <= by - sy / 2 + 0.02) continue;
+
+            const dx = p.x - bx, dz = p.z - bz;
+            const overlapX = (sx / 2 + RADIUS) - Math.abs(dx);
+            const overlapZ = (sz / 2 + RADIUS) - Math.abs(dz);
+
+            if (overlapX > 0 && overlapZ > 0) {
+                if (overlapX < overlapZ) {
+                    p.x += dx > 0 ? overlapX : -overlapX;
+                    p.velocity.x = 0;
+                } else {
+                    p.z += dz > 0 ? overlapZ : -overlapZ;
+                    p.velocity.z = 0;
+                }
+            }
         }
     },
 

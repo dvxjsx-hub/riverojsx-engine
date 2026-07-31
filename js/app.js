@@ -59,21 +59,29 @@ const App = {
         window.addEventListener('orientationchange', () => setTimeout(hideAddressBar, 100));
         window.addEventListener('resize', () => setTimeout(hideAddressBar, 50));
 
-        // Pedir pantalla completa en el primer toque/click (requiere gesto
-        // del usuario; los navegadores no permiten hacerlo automáticamente)
+        // Pedir pantalla completa en cada toque/click mientras no esté ya
+        // activa (requiere gesto del usuario; los navegadores no permiten
+        // hacerlo automáticamente). Al recargar la página se pierde el
+        // estado de pantalla completa, así que el primer toque tras la
+        // recarga vuelve a activarla — sin límite de "una sola vez".
         const tryFullscreen = () => {
             const el = document.documentElement;
+            const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement;
+            if (isFullscreen) return;
             const req = el.requestFullscreen || el.webkitRequestFullscreen ||
                         el.mozRequestFullScreen || el.msRequestFullscreen;
-            if (req && !document.fullscreenElement && !document.webkitFullscreenElement) {
+            if (req) {
                 try {
                     const p = req.call(el);
                     if (p && p.catch) p.catch(() => {});
                 } catch (e) { /* no soportado en este navegador */ }
             }
         };
-        document.addEventListener('touchend', tryFullscreen, { once: true });
-        document.addEventListener('click', tryFullscreen, { once: true });
+        document.addEventListener('touchend', tryFullscreen, { passive: true });
+        document.addEventListener('click', tryFullscreen);
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') tryFullscreen();
+        });
     },
     
     loadData() {
@@ -102,6 +110,12 @@ const App = {
         const savedFriends = localStorage.getItem('riverojsx_friends');
         if (savedFriends) {
             this.player.friends = JSON.parse(savedFriends);
+        }
+
+        // Mostrar de inmediato la lista guardada (sin esperar al servidor)
+        // para que no "desaparezca" un instante al recargar la página
+        if (typeof Friends !== 'undefined') {
+            Friends.list = this.player.friends || [];
         }
     },
     
@@ -147,6 +161,10 @@ const App = {
                     id: this.player.id, 
                     name: this.player.name 
                 });
+
+                // Refrescar amigos/solicitudes reales apenas hay conexión,
+                // para que la lista quede al día (y no solo al abrir Perfil)
+                if (typeof Friends !== 'undefined') Friends.refresh();
             });
             
             this.socket.on('disconnect', () => {
@@ -276,12 +294,25 @@ const App = {
         }
         
         localStorage.setItem('riverojsx_maps', JSON.stringify(maps));
-        
-        // Enviar al servidor para compartir
+        return mapData;
+    },
+
+    // Publica el mapa para que aparezca en MAPAS y todos los jugadores
+    // puedan verlo/jugarlo. Si ya existía uno publicado con el mismo
+    // nombre y autor, el servidor lo actualiza en vez de duplicarlo.
+    publishMap(name, blocks) {
+        const mapData = {
+            name: name,
+            blocks: blocks,
+            created: new Date().toISOString(),
+            author: this.player.name,
+            authorId: this.player.id
+        };
+
         if (this.socket && this.socket.connected) {
             this.socket.emit('share_map', mapData);
         }
-        
+
         return mapData;
     },
     
@@ -363,9 +394,10 @@ const App = {
     // Generadas por canvas para no depender de assets externos.
     // Se usan tanto en el juego (solo/online) como en el modo desarrollador
     // para mantener una estética coherente, sin añadir luces extra.
-    createSkyTexture(topColor, bottomColor) {
+    createSkyTexture(topColor, bottomColor, horizonColor) {
         topColor = topColor || '#3f8fd6';
         bottomColor = bottomColor || '#cdeafb';
+        horizonColor = horizonColor || '#eaf7ff';
         const canvas = document.createElement('canvas');
         canvas.width = 4;
         canvas.height = 256;
@@ -373,7 +405,7 @@ const App = {
         const grad = ctx.createLinearGradient(0, 0, 0, 256);
         grad.addColorStop(0, topColor);
         grad.addColorStop(0.7, bottomColor);
-        grad.addColorStop(1, '#eaf7ff');
+        grad.addColorStop(1, horizonColor);
         ctx.fillStyle = grad;
         ctx.fillRect(0, 0, 4, 256);
         const tex = new THREE.CanvasTexture(canvas);
