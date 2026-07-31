@@ -20,7 +20,7 @@ const App = {
         sensitivity: 0.5,
         language: 'es',
         showFPS: false,
-        version: 'BETA 1.0'
+        version: 'BETA 1.1'
     },
     
     init() {

@@ -8,20 +8,30 @@ const Menu = {
             <div class="screen" id="screen-home">
                 <button class="config-corner-btn" onclick="App.showScreen('config')" aria-label="Configuración">⚙️</button>
 
-                <div class="home-header">
-                    <button class="profile-btn" onclick="App.showScreen('profile')">
-                        <span class="profile-btn-avatar">👤</span>
-                        <span class="profile-btn-name">${App.player.name}</span>
-                    </button>
-                </div>
+                <button class="profile-btn" onclick="App.showScreen('profile')">
+                    <span class="profile-btn-avatar">👤</span>
+                    <span class="profile-btn-name">${App.player.name}</span>
+                </button>
 
-                <div class="home-content">
-                    <div class="game-title">riverojsx<br>engine</div>
+                <div class="home-layout">
+                    <div class="home-brand">
+                        <div class="game-title">riverojsx<br>engine</div>
+                        <div class="game-tagline">Motor de juego</div>
+                    </div>
 
-                    <div class="menu-list">
-                        <button class="menu-btn primary" onclick="App.showScreen('play')">Jugar</button>
-                        <button class="menu-btn" onclick="App.showScreen('news')">Novedades</button>
-                        <button class="menu-btn" onclick="App.showScreen('maps')">Mapas</button>
+                    <div class="home-nav">
+                        <button class="nav-item nav-item-primary" onclick="App.showScreen('play')">
+                            <span class="nav-item-icon">▶</span>
+                            <span class="nav-item-label">Jugar</span>
+                        </button>
+                        <button class="nav-item" onclick="App.showScreen('news')">
+                            <span class="nav-item-icon">◆</span>
+                            <span class="nav-item-label">Novedades</span>
+                        </button>
+                        <button class="nav-item" onclick="App.showScreen('maps')">
+                            <span class="nav-item-icon">▦</span>
+                            <span class="nav-item-label">Mapas</span>
+                        </button>
                     </div>
                 </div>
 
