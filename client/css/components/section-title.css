@@ -1,10 +1,20 @@
 /* ===== TITULOS SECCION ===== */
 .section-title {
+    font-family: var(--font-body);
     font-size: 10px;
     color: var(--text-faint);
     text-transform: uppercase;
-    letter-spacing: 1.8px;
-    margin: 10px 0 5px 0;
-    font-weight: 500;
+    letter-spacing: 2px;
+    margin: 12px 0 6px 2px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
-
+.section-title::before {
+    content: '';
+    width: 12px;
+    height: 1px;
+    background: var(--accent-dim);
+    opacity: 0.6;
+}

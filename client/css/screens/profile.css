@@ -1,27 +1,30 @@
-/* ===== PERFIL ===== */
+/* ===== PERFIL =====
+   Rediseño: tarjeta de vidrio con borde uniforme (antes tenía un filo de
+   color a la izquierda); resto de la identidad igual que el resto del menú. */
 .profile-card {
     display: flex;
     align-items: center;
     gap: 14px;
-    padding: 16px 14px 16px 16px;
-    background: linear-gradient(135deg, rgba(79, 195, 247, 0.07), rgba(79, 195, 247, 0.02));
-    border: 1px solid rgba(79, 195, 247, 0.16);
-    border-left: 3px solid var(--accent);
-    border-radius: 4px 12px 12px 4px;
-    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.18);
+    padding: 18px 16px;
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
 }
 
 .profile-avatar {
     width: 46px;
     height: 46px;
     border-radius: 50%;
-    background: var(--blue-700);
+    background: var(--panel-strong);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 18px;
     color: var(--accent-dim);
-    border: 1px solid rgba(79, 195, 247, 0.3);
+    border: 1px solid var(--panel-border-strong);
 }
 
 .profile-info {
@@ -29,38 +32,46 @@
 }
 
 .profile-name {
-    font-size: 13px;
+    font-family: var(--font-display);
+    font-size: 14px;
     color: var(--text-hi);
-    font-weight: 600;
+    font-weight: 700;
+    letter-spacing: 0.3px;
 }
 
 .profile-status {
+    font-family: var(--font-body);
     font-size: 10px;
     color: var(--success);
-    margin-top: 2px;
+    margin-top: 3px;
 }
 
 .edit-name-input {
-    background: var(--blue-800);
-    border: 1px solid var(--blue-600);
+    font-family: var(--font-body);
+    background: var(--panel);
+    border: 1px solid var(--panel-border-strong);
     color: var(--text-hi);
     font-size: 13px;
-    padding: 8px 12px;
-    border-radius: 6px;
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
     width: 100%;
     outline: none;
+    backdrop-filter: blur(10px);
 }
 .edit-name-input:focus {
     border-color: var(--accent);
 }
 
 .small-btn {
+    font-family: var(--font-body);
     font-size: 10px;
-    font-weight: 500;
-    color: var(--accent);
+    font-weight: 600;
+    color: var(--accent-dim);
     background: none;
     border: none;
     cursor: pointer;
-    padding: 4px 0;
+    padding: 6px 0;
+    letter-spacing: 0.3px;
+    transition: color var(--dur-fast) var(--ease);
 }
-
+.small-btn:hover { color: var(--accent); }

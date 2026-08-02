@@ -1,54 +1,51 @@
-/* ===== BOTONES DE MENÚ (texto, sin rectángulo) =====
-   Inspirado en menús de consola: la opción principal resalta en blanco y
-   el resto queda atenuado en gris-azulado, sin recuadros ni bordes. */
+/* ===== BOTONES DE MENÚ =====
+   Rediseño: tarjetas con borde suave tipo "vidrio", en vez de texto plano.
+   Mismo comportamiento y mismas clases (.menu-btn, .primary, .sub),
+   solo cambia la apariencia. */
 .menu-btn {
     position: relative;
-    font-size: 11px;
-    font-weight: 700;
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 600;
     color: var(--text-lo);
-    background: none;
-    border: none;
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius-md);
     text-align: left;
-    padding: 8px 0 8px 14px;
+    padding: 15px 18px;
     cursor: pointer;
-    letter-spacing: 1.2px;
+    letter-spacing: 0.8px;
     text-transform: uppercase;
-    transition: color 0.15s, transform 0.15s;
     width: 100%;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transition: color var(--dur-fast) var(--ease),
+                border-color var(--dur-fast) var(--ease),
+                background var(--dur-fast) var(--ease),
+                transform var(--dur-fast) var(--ease),
+                box-shadow var(--dur-fast) var(--ease);
 }
-.menu-btn::before {
-    content: '';
-    position: absolute;
-    left: 0; top: 50%;
-    transform: translateY(-50%);
-    width: 3px;
-    height: 0%;
-    background: var(--accent);
-    box-shadow: 0 0 8px rgba(79, 195, 247, 0.7);
-    transition: height 0.18s ease;
+.menu-btn:hover {
+    color: var(--text-hi);
+    border-color: var(--panel-border-strong);
+    transform: translateY(-1px);
 }
-.menu-btn:hover, .menu-btn:active {
-    color: var(--accent-dim);
-    transform: translateX(3px);
-}
-.menu-btn:hover::before, .menu-btn:active::before {
-    height: 60%;
+.menu-btn:active {
+    transform: scale(0.98) translateY(0);
+    background: var(--panel-strong);
 }
 
 .menu-btn.primary {
-    font-size: 14px;
-    font-weight: 800;
+    font-size: 13px;
+    font-weight: 700;
     color: var(--text-hi);
-    letter-spacing: 1.5px;
-    padding-bottom: 12px;
-    text-shadow: 0 0 20px rgba(79, 195, 247, 0.35);
+    letter-spacing: 1.2px;
+    border-color: rgba(79, 195, 247, 0.28);
+    box-shadow: 0 0 0 1px rgba(79, 195, 247, 0.05) inset, var(--shadow-card);
 }
-.menu-btn.primary::before {
-    width: 4px;
-}
-.menu-btn.primary:hover, .menu-btn.primary:active {
-    color: var(--accent);
-    transform: translateX(4px);
+.menu-btn.primary:hover {
+    border-color: var(--accent);
+    box-shadow: 0 0 24px rgba(79, 195, 247, 0.16), var(--shadow-card);
 }
 
 .menu-btn.sub {
@@ -57,24 +54,25 @@
     color: var(--text-faint);
     text-transform: none;
     letter-spacing: 0.3px;
-    padding: 8px 0 8px 14px;
+    padding: 12px 16px;
+    background: transparent;
+    border-color: var(--panel-border);
 }
-.menu-btn.sub:hover, .menu-btn.sub:active {
-    color: var(--accent-dim);
-    transform: translateX(2px);
+.menu-btn.sub:hover {
+    color: var(--text-lo);
+    border-color: var(--panel-border-strong);
 }
 
 .menu-list {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 8px;
     margin-top: 6px;
 }
 
 /* Separadores */
 .divider {
     height: 1px;
-    background: linear-gradient(90deg, rgba(79,195,247,0.18), transparent 85%);
-    margin: 6px 0;
+    background: linear-gradient(90deg, var(--panel-border-strong), transparent 85%);
+    margin: 10px 0;
 }
-

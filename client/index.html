@@ -8,6 +8,9 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>riverojsx-engine</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/main.css">
     <!-- Three.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -17,6 +20,16 @@
 <body>
     <div id="orientation-warning">
         <p>Gira tu dispositivo a horizontal para jugar</p>
+    </div>
+
+    <!-- Fondo espacial: fuera de #app a propósito, para no desaparecer
+         cuando cada pantalla reemplaza el contenido de #app -->
+    <div class="stars-layer" aria-hidden="true">
+        <div class="stars-field">
+            <div class="stars-small"></div>
+            <div class="stars-medium"></div>
+            <div class="stars-bright"></div>
+        </div>
     </div>
 
     <div id="app">

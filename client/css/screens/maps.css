@@ -1,36 +1,42 @@
-/* ===== MAPAS ===== */
+/* ===== MAPAS =====
+   Rediseño: mismas tarjetas de vidrio que el resto del sistema. */
 .map-card {
-    background: linear-gradient(155deg, var(--blue-850), var(--blue-900));
-    border: 1px solid rgba(79, 195, 247, 0.12);
-    border-left: 3px solid rgba(79, 195, 247, 0.35);
-    border-radius: 3px 10px 10px 3px;
-    padding: 13px 14px;
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
     margin-bottom: 8px;
     cursor: pointer;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.14);
-    transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transition: border-color var(--dur-fast) var(--ease),
+                transform var(--dur-fast) var(--ease),
+                box-shadow var(--dur-fast) var(--ease);
 }
-.map-card:hover, .map-card:active {
-    border-color: var(--accent);
-    border-left-color: var(--accent);
+.map-card:hover {
+    border-color: var(--panel-border-strong);
     transform: translateX(3px);
-    box-shadow: 0 4px 18px rgba(79, 195, 247, 0.15);
+}
+.map-card:active {
+    border-color: var(--accent);
+    box-shadow: 0 0 20px rgba(79, 195, 247, 0.12);
 }
 
 .map-name {
-    font-size: 12px;
+    font-family: var(--font-body);
+    font-size: 12.5px;
     color: var(--text-hi);
     font-weight: 600;
 }
 
 .map-meta {
+    font-family: var(--font-body);
     font-size: 10px;
     color: var(--text-faint);
     margin-top: 4px;
 }
 
 .map-default {
-    border-color: rgba(79, 195, 247, 0.08);
-    background: var(--blue-900);
+    border-style: dashed;
+    border-color: var(--panel-border-strong);
 }
-
