@@ -1,0 +1,22 @@
+/* ===== SCREEN BASE (menús) ===== */
+.screen {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0; left: 0;
+    display: flex;
+    flex-direction: column;
+    background:
+        radial-gradient(900px 520px at 85% -12%, rgba(79, 195, 247, 0.14), transparent 60%),
+        radial-gradient(650px 480px at -8% 112%, rgba(79, 195, 247, 0.07), transparent 60%),
+        repeating-linear-gradient(0deg, rgba(255,255,255,0.025) 0px, rgba(255,255,255,0.025) 1px, transparent 1px, transparent 46px),
+        repeating-linear-gradient(90deg, rgba(255,255,255,0.025) 0px, rgba(255,255,255,0.025) 1px, transparent 1px, transparent 46px),
+        linear-gradient(165deg, var(--blue-900) 0%, var(--blue-950) 78%);
+    animation: fadeIn 0.25s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.98); }
+    to { opacity: 1; transform: scale(1); }
+}
+

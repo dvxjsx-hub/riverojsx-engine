@@ -1,0 +1,81 @@
+/* ===== BOTONES DE ACCIÓN (derecha): correr / saltar / volar ===== */
+.action-cluster {
+    position: fixed;
+    right: max(18px, env(safe-area-inset-right));
+    bottom: max(20px, env(safe-area-inset-bottom));
+    z-index: 101;
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+}
+
+.action-btn {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: var(--hud-bg);
+    color: var(--hud-text);
+    border: 1px solid var(--hud-border);
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.25);
+    touch-action: none;
+}
+
+.action-btn .icon {
+    font-size: 16px;
+    line-height: 1;
+    display: block;
+    margin-bottom: 2px;
+}
+
+.action-btn.run-btn {
+    width: 48px;
+    height: 48px;
+    font-size: 8px;
+    align-self: flex-end;
+    margin-bottom: 6px;
+    opacity: 0.92;
+}
+
+.action-btn.pressed {
+    background: var(--hud-active);
+    color: #06202f;
+    transform: scale(0.95);
+}
+
+.action-btn.run-btn.active {
+    background: var(--hud-active);
+    color: #06202f;
+}
+
+.action-mini-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--hud-bg-soft);
+    color: var(--hud-text);
+    border: 1px solid var(--hud-border);
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    touch-action: none;
+}
+.action-mini-btn.pressed {
+    background: var(--hud-active);
+    color: #06202f;
+}
+
+.action-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+}
+

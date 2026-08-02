@@ -1,0 +1,80 @@
+/* ===== BOTONES DE MENÚ (texto, sin rectángulo) =====
+   Inspirado en menús de consola: la opción principal resalta en blanco y
+   el resto queda atenuado en gris-azulado, sin recuadros ni bordes. */
+.menu-btn {
+    position: relative;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-lo);
+    background: none;
+    border: none;
+    text-align: left;
+    padding: 8px 0 8px 14px;
+    cursor: pointer;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    transition: color 0.15s, transform 0.15s;
+    width: 100%;
+}
+.menu-btn::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 0%;
+    background: var(--accent);
+    box-shadow: 0 0 8px rgba(79, 195, 247, 0.7);
+    transition: height 0.18s ease;
+}
+.menu-btn:hover, .menu-btn:active {
+    color: var(--accent-dim);
+    transform: translateX(3px);
+}
+.menu-btn:hover::before, .menu-btn:active::before {
+    height: 60%;
+}
+
+.menu-btn.primary {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--text-hi);
+    letter-spacing: 1.5px;
+    padding-bottom: 12px;
+    text-shadow: 0 0 20px rgba(79, 195, 247, 0.35);
+}
+.menu-btn.primary::before {
+    width: 4px;
+}
+.menu-btn.primary:hover, .menu-btn.primary:active {
+    color: var(--accent);
+    transform: translateX(4px);
+}
+
+.menu-btn.sub {
+    font-size: 10.5px;
+    font-weight: 500;
+    color: var(--text-faint);
+    text-transform: none;
+    letter-spacing: 0.3px;
+    padding: 8px 0 8px 14px;
+}
+.menu-btn.sub:hover, .menu-btn.sub:active {
+    color: var(--accent-dim);
+    transform: translateX(2px);
+}
+
+.menu-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-top: 6px;
+}
+
+/* Separadores */
+.divider {
+    height: 1px;
+    background: linear-gradient(90deg, rgba(79,195,247,0.18), transparent 85%);
+    margin: 6px 0;
+}
+

@@ -1,0 +1,8 @@
+/* ===== EMPTY STATE ===== */
+.empty-state {
+    text-align: center;
+    padding: 44px 20px;
+    color: var(--text-faint);
+    font-size: 12px;
+    line-height: 1.6;
+}

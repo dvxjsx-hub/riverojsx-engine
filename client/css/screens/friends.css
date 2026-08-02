@@ -1,0 +1,100 @@
+/* ===== AMIGOS ===== */
+.friend-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px 10px 13px;
+    margin-top: 6px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.025), rgba(255,255,255,0.005));
+    border: 1px solid rgba(79, 195, 247, 0.1);
+    border-left: 2px solid rgba(79, 195, 247, 0.4);
+    border-radius: 3px 8px 8px 3px;
+    transition: border-color 0.15s;
+}
+.friend-item:has(.friend-status.online) {
+    border-left-color: var(--success);
+}
+
+.friend-name {
+    font-size: 12px;
+    color: var(--text-hi);
+}
+
+.friend-status {
+    font-size: 9px;
+    padding: 3px 9px;
+    border-radius: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+.friend-status.online {
+    color: var(--success);
+    background: rgba(82, 209, 124, 0.1);
+}
+.friend-status.offline {
+    color: var(--text-faint);
+    background: rgba(255,255,255,0.03);
+}
+
+.add-friend-input {
+    background: var(--blue-800);
+    border: 1px solid var(--blue-600);
+    color: var(--text-hi);
+    font-size: 12px;
+    padding: 10px 12px;
+    border-radius: 6px;
+    width: 100%;
+    margin-bottom: 8px;
+    outline: none;
+    letter-spacing: 2px;
+    text-align: center;
+}
+
+.my-id-display {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--accent-dim);
+    letter-spacing: 3px;
+    font-family: monospace;
+    margin-top: 4px;
+}
+
+.friend-request-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px 10px 13px;
+    margin-top: 6px;
+    background: linear-gradient(135deg, rgba(79, 195, 247, 0.08), rgba(79, 195, 247, 0.02));
+    border: 1px solid rgba(79, 195, 247, 0.2);
+    border-left: 2px solid var(--accent);
+    border-radius: 3px 8px 8px 3px;
+}
+
+.friend-request-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.small-btn.accept {
+    color: var(--success);
+}
+
+.small-btn.reject {
+    color: var(--danger);
+}
+
+.friend-remove-btn {
+    background: none;
+    border: none;
+    color: var(--text-faint);
+    font-size: 12px;
+    padding: 2px 4px;
+    cursor: pointer;
+    line-height: 1;
+}
+.friend-remove-btn:active {
+    color: var(--danger);
+}
+

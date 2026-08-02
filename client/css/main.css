@@ -1,0 +1,43 @@
+/* ==========================================================================
+   riverojsx-engine — punto de entrada de estilos
+   Importa todos los módulos en el MISMO ORDEN que el style.css original
+   para preservar exactamente la cascada/especificidad previa.
+   ========================================================================== */
+
+/* Base */
+@import url('base/variables.css');
+@import url('base/reset.css');
+@import url('base/immersive.css');
+@import url('base/layout-mobile.css');
+
+/* Componentes compartidos entre pantallas */
+@import url('components/screen-base.css');
+@import url('components/screen-header.css');
+@import url('components/content.css');
+@import url('components/buttons.css');
+@import url('components/section-title.css');
+
+/* Pantallas de menú */
+@import url('screens/home.css');
+@import url('screens/profile.css');
+@import url('screens/friends.css');
+@import url('screens/news.css');
+@import url('screens/maps.css');
+@import url('screens/config.css');
+@import url('screens/multiplayer-lobby.css');
+
+/* Mundo 3D: elementos compartidos por Game y Developer */
+@import url('screens/game/canvas.css');
+@import url('screens/game/hud.css');
+@import url('screens/game/joystick.css');
+@import url('screens/game/action-buttons.css');
+
+/* Modo desarrollador: elementos propios */
+@import url('screens/developer/crosshair.css');
+@import url('screens/developer/hotbar.css');
+@import url('screens/developer/creative-panel.css');
+
+/* Componentes globales de UI */
+@import url('components/toast.css');
+@import url('components/scrollbar.css');
+@import url('components/empty-state.css');

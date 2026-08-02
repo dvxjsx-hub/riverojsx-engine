@@ -153,3 +153,43 @@ Proyecto desarrollado como parte del aprendizaje de programación, motores de ju
 ---
 
 *"Primero construir el motor. Después construir el mundo."*
+---
+
+# 🗂 Arquitectura del proyecto
+
+El código se reorganizó en capas para poder seguir creciendo sin volver a
+convertirse en archivos gigantes con múltiples responsabilidades. El
+comportamiento del motor no cambió: es la misma lógica, solo movida de sitio.
+
+```
+riverojsx-engine/
+├── client/                  # Todo el frontend (antes suelto en la raíz)
+│   ├── index.html
+│   ├── core/                # Motor base: bootstrap, router, persistencia,
+│   │                        # conexión Socket.IO, modo inmersivo
+│   ├── engine3d/            # Utilidades 3D compartidas por Game y Developer
+│   │   ├── textures.js      # Cielo/piso (antes en App)
+│   │   ├── input/           # Joystick virtual reutilizable
+│   │   └── world/           # Catálogo de tipos de bloque
+│   ├── features/            # Una carpeta por funcionalidad
+│   │   ├── menu/ profile/ friends/ news/ settings/ maps/
+│   │   ├── multiplayer/     # Crear/unirse a sala, lobby
+│   │   ├── game/            # Modo Solo/Multiplayer
+│   │   └── developer/       # Modo Desarrollador (la parte más importante)
+│   └── css/
+│       ├── base/ components/ screens/   # style.css dividido por sección
+│
+├── server/
+│   ├── server.js             # Solo bootstrap (Express + Socket.IO)
+│   ├── config/                # Variables de entorno
+│   ├── sockets/                # Un handler por dominio (salas, juego,
+│   │                            # amigos, invitaciones, mapas, developer)
+│   ├── services/                # Estado y lógica (rooms, presence, accounts,
+│   │                             # friends, maps)
+│   ├── utils/                    # Generadores de ID
+│   └── data/                      # accounts.json
+```
+
+Cada feature nueva (inventario, físicas, iluminación, IA, etc.) puede añadirse
+como una carpeta más dentro de `features/` o `engine3d/` sin tocar el resto
+del motor.

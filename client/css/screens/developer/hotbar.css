@@ -1,0 +1,46 @@
+/* ===== HOTBAR estilo Minecraft (modo desarrollador) ===== */
+.hotbar {
+    position: fixed;
+    bottom: max(14px, env(safe-area-inset-bottom));
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 102;
+    display: flex;
+    gap: 5px;
+    background: rgba(10, 20, 35, 0.28);
+    padding: 6px;
+    border-radius: 12px;
+    backdrop-filter: blur(3px);
+    border: 1px solid rgba(255,255,255,0.14);
+}
+
+.hotbar-slot {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    background: var(--hud-bg);
+    border: 1.5px solid var(--hud-border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--hud-text);
+    font-size: 15px;
+    cursor: pointer;
+    touch-action: none;
+}
+.hotbar-slot .hotbar-icon { line-height: 1; }
+.hotbar-slot .hotbar-label {
+    font-size: 6px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    margin-top: 1px;
+    text-transform: uppercase;
+    color: var(--hud-text);
+}
+.hotbar-slot.active {
+    border-color: var(--accent-2);
+    box-shadow: 0 0 0 2px rgba(41, 182, 246, 0.4);
+    background: #fff;
+}
+

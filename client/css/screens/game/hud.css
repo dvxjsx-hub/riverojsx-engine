@@ -1,0 +1,83 @@
+/* ===== HUD: overlay superior (claro, texto negro fino) ===== */
+.game-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%;
+    z-index: 101;
+    pointer-events: none;
+    padding: max(10px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) 0 max(14px, env(safe-area-inset-left));
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.game-overlay > * {
+    pointer-events: auto;
+}
+
+.hud-chip {
+    font-size: 9.5px;
+    font-weight: 600;
+    color: var(--hud-text);
+    background: var(--hud-bg);
+    padding: 5px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.4px;
+    border: 1px solid var(--hud-border);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+}
+
+.hud-cluster {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+}
+
+.hud-cluster-row {
+    display: flex;
+    gap: 6px;
+}
+
+.fps-counter {
+    font-size: 9.5px;
+    font-weight: 600;
+    color: var(--hud-text);
+    font-family: 'SFMono-Regular', Consolas, monospace;
+    background: var(--hud-bg);
+    padding: 5px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--hud-border);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+}
+
+.exit-game-btn {
+    font-size: 9.5px;
+    font-weight: 700;
+    color: #b3271f;
+    background: var(--hud-bg);
+    border: 1px solid var(--hud-border);
+    padding: 6px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    letter-spacing: 0.4px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+}
+
+.creative-toggle-btn {
+    font-size: 9.5px;
+    font-weight: 600;
+    color: var(--hud-text);
+    background: var(--hud-bg);
+    border: 1px solid var(--hud-border);
+    padding: 6px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    letter-spacing: 0.4px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+}
+.creative-toggle-btn.active {
+    background: var(--hud-active);
+    color: #06202f;
+}
+

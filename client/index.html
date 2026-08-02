@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0a1730">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>riverojsx-engine</title>
+    <link rel="stylesheet" href="css/main.css">
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- Socket.io -->
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+</head>
+<body>
+    <div id="orientation-warning">
+        <p>Gira tu dispositivo a horizontal para jugar</p>
+    </div>
+
+    <div id="app">
+        <!-- Pantallas se renderizan aquí -->
+    </div>
+
+    <!-- ===== CORE: motor base (estado, router, persistencia, red, inmersivo) ===== -->
+    <script src="core/event-bus.js"></script>
+    <script src="core/engine-core.js"></script>
+    <script src="core/storage-service.js"></script>
+    <script src="core/socket-client.js"></script>
+    <script src="core/screen-router.js"></script>
+    <script src="core/immersive-mode.js"></script>
+
+    <!-- ===== ENGINE3D: utilidades 3D compartidas entre Game y Developer ===== -->
+    <script src="engine3d/textures.js"></script>
+    <script src="engine3d/world/block-registry.js"></script>
+    <script src="engine3d/input/virtual-joystick.js"></script>
+
+    <!-- ===== FEATURE: Mapas (servicio, sin dependencias de UI) ===== -->
+    <script src="features/maps/maps.service.js"></script>
+
+    <!-- ===== FEATURE: Menú (Home/Jugar/Solo/Multiplayer) — define Menu ===== -->
+    <script src="features/menu/home.screen.js"></script>
+
+    <!-- Pantalla de Mapas (se añade a Menu, por eso va después de definirlo) -->
+    <script src="features/maps/maps.screen.js"></script>
+
+    <!-- ===== FEATURE: Perfil (se añade a Menu) ===== -->
+    <script src="features/profile/profile.screen.js"></script>
+
+    <!-- ===== FEATURE: Amigos ===== -->
+    <script src="features/friends/friends.service.js"></script>
+    <script src="features/friends/friends.screen.js"></script>
+    <script src="features/friends/friends.panel.js"></script>
+    <script src="features/friends/friends.invites.js"></script>
+
+    <!-- ===== FEATURE: Novedades (se añade a Menu) ===== -->
+    <script src="features/news/news.screen.js"></script>
+
+    <!-- ===== FEATURE: Configuración (se añade a Menu) ===== -->
+    <script src="features/settings/settings.screen.js"></script>
+
+    <!-- ===== FEATURE: Multiplayer ===== -->
+    <script src="features/multiplayer/room-create.screen.js"></script>
+    <script src="features/multiplayer/multiplayer.socket.js"></script>
+    <script src="features/multiplayer/room-join.screen.js"></script>
+    <script src="features/multiplayer/lobby.screen.js"></script>
+
+    <!-- ===== FEATURE: Juego (Solo/Multiplayer) ===== -->
+    <script src="features/game/game.mode.js"></script>
+    <script src="features/game/game.scene.js"></script>
+    <script src="features/game/game.controls.js"></script>
+    <script src="features/game/game.multiplayer.js"></script>
+    <script src="features/game/game.loop.js"></script>
+
+    <!-- ===== FEATURE: Modo Desarrollador ===== -->
+    <script src="features/developer/developer.mode.js"></script>
+    <script src="features/developer/developer.scene.js"></script>
+    <script src="features/developer/developer.building.js"></script>
+    <script src="features/developer/developer.controls.js"></script>
+    <script src="features/developer/developer.tools.js"></script>
+    <script src="features/developer/developer.multiplayer.js"></script>
+    <script src="features/developer/developer.loop.js"></script>
+</body>
+</html>

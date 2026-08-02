@@ -1,0 +1,4 @@
+/* Modo inmersivo: el juego ocupa la totalidad del espacio disponible */
+body.immersive, body.immersive #app {
+    background: #000;
+}

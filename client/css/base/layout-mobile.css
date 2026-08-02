@@ -1,0 +1,33 @@
+/* Solo horizontal */
+#orientation-warning {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: radial-gradient(circle at 50% 40%, var(--blue-800), var(--blue-950));
+    z-index: 99999;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 20px;
+}
+#orientation-warning p {
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--text-hi);
+    letter-spacing: 0.5px;
+}
+
+@media (orientation: portrait) {
+    #orientation-warning { display: flex; }
+    #app { display: none !important; }
+}
+
+#app {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+    background: var(--blue-950);
+}
+

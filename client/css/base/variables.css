@@ -1,0 +1,30 @@
+/* ==========================================================================
+   riverojsx-engine — sistema visual
+   Tema de menús: azul profesional. HUD de juego: chips claros, texto negro
+   fino. Ver README de cambios al final del archivo.
+   ========================================================================== */
+
+:root {
+    --blue-950: #050b16;
+    --blue-900: #0a1730;
+    --blue-850: #0d1f40;
+    --blue-800: #11284f;
+    --blue-700: #16345f;
+    --blue-600: #1c4272;
+    --blue-500: #245187;
+    --accent: #4fc3f7;
+    --accent-2: #29b6f6;
+    --accent-dim: #7fd4fb;
+    --text-hi: #f2f8fd;
+    --text-lo: #93aecb;
+    --text-faint: #5c7799;
+    --danger: #ff6b6b;
+    --success: #52d17c;
+
+    /* HUD de juego: botones claros, letras negras finas */
+    --hud-bg: rgba(255, 255, 255, 0.94);
+    --hud-bg-soft: rgba(255, 255, 255, 0.72);
+    --hud-text: #14181d;
+    --hud-border: rgba(10, 20, 35, 0.1);
+    --hud-active: var(--accent-2);
+}

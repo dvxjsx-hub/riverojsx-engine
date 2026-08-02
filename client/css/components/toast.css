@@ -1,0 +1,24 @@
+/* ===== TOAST ===== */
+.toast {
+    position: fixed;
+    bottom: 90px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(10, 20, 38, 0.95);
+    border: 1px solid rgba(79, 195, 247, 0.25);
+    color: var(--text-hi);
+    font-size: 11px;
+    padding: 11px 20px;
+    border-radius: 10px;
+    z-index: 9999;
+    animation: toastIn 0.2s ease;
+    pointer-events: none;
+    max-width: 80%;
+    text-align: center;
+}
+
+@keyframes toastIn {
+    from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+    to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+

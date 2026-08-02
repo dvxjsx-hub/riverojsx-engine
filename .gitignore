@@ -1,0 +1,17 @@
+# Dependencias
+node_modules/
+server/node_modules/
+
+# Datos persistentes locales (no versionar cuentas reales)
+server/data/accounts.json
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Entorno
+.env

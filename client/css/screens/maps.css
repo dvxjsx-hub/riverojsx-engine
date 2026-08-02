@@ -1,0 +1,36 @@
+/* ===== MAPAS ===== */
+.map-card {
+    background: linear-gradient(155deg, var(--blue-850), var(--blue-900));
+    border: 1px solid rgba(79, 195, 247, 0.12);
+    border-left: 3px solid rgba(79, 195, 247, 0.35);
+    border-radius: 3px 10px 10px 3px;
+    padding: 13px 14px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.14);
+    transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+}
+.map-card:hover, .map-card:active {
+    border-color: var(--accent);
+    border-left-color: var(--accent);
+    transform: translateX(3px);
+    box-shadow: 0 4px 18px rgba(79, 195, 247, 0.15);
+}
+
+.map-name {
+    font-size: 12px;
+    color: var(--text-hi);
+    font-weight: 600;
+}
+
+.map-meta {
+    font-size: 10px;
+    color: var(--text-faint);
+    margin-top: 4px;
+}
+
+.map-default {
+    border-color: rgba(79, 195, 247, 0.08);
+    background: var(--blue-900);
+}
+
